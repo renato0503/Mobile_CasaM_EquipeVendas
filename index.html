@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CASA MASSIMA | Sales Team</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* =========================================
+           iOS / APPLE THEME VARIABLES
+           ========================================= */
+        :root {
+            --ios-bg: #000000;
+            --ios-card: #1c1c1e;
+            --ios-card-border: #2c2c2e;
+            --ios-input-bg: #2c2c2e;
+            --ios-header-bg: rgba(28, 28, 30, 0.85);
+            
+            --brand-red: #ff453a;
+            --brand-gold: #ffd60a;
+            --brand-blue: #0a84ff;
+            --brand-green: #30d158;
+            --brand-orange: #ff9f0a;
+            
+            --text-primary: #ffffff;
+            --text-secondary: #8e8e93;
+            --text-tertiary: #48484a;
+
+            --radius-l: 20px;
+            --radius-m: 12px;
+            --radius-s: 8px;
+            
+            --safe-area-top: env(safe-area-inset-top);
+            --safe-area-bottom: env(safe-area-inset-bottom);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--ios-bg);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 15px;
+            overflow-x: hidden;
+            padding-bottom: calc(80px + var(--safe-area-bottom));
+        }
+
+        /* =========================================
+           HEADER & NAVIGATION
+           ========================================= */
+        .app-header {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: calc(60px + var(--safe-area-top));
+            padding-top: var(--safe-area-top);
+            background: var(--ios-header-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid var(--ios-card-border);
+            display: flex; align-items: center; justify-content: space-between;
+            padding-left: 16px; padding-right: 16px;
+            z-index: 1000;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-btn { background: none; border: none; color: var(--brand-gold); font-size: 22px; cursor: pointer; padding: 5px; }
+        .app-title { font-weight: 700; font-size: 17px; letter-spacing: -0.5px; }
+        .app-title span { display: block; font-size: 10px; color: var(--text-secondary); font-weight: 400; text-transform: uppercase; }
+        .header-actions { display: flex; gap: 15px; }
+        .action-btn { background: none; border: none; color: var(--brand-blue); font-size: 18px; cursor: pointer; }
+
+        /* =========================================
+           SIDEBAR (DRAWER)
+           ========================================= */
+        .drawer-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5); z-index: 1001;
+            opacity: 0; pointer-events: none; transition: 0.3s ease;
+            backdrop-filter: blur(2px);
+        }
+        .drawer-overlay.active { opacity: 1; pointer-events: all; }
+
+        .drawer {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: 280px; background: var(--ios-card);
+            transform: translateX(-100%); transition: 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 1002; padding: 30px 20px;
+            display: flex; flex-direction: column;
+            border-right: 1px solid var(--ios-card-border);
+        }
+        .drawer.active { transform: translateX(0); }
+
+        .brand-profile { margin-bottom: 30px; display: flex; align-items: center; gap: 15px; }
+        .brand-logo { 
+            width: 48px; height: 48px; border-radius: 12px; 
+            background: linear-gradient(135deg, #7a1f20, #3e1213);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--brand-gold); font-weight: 800; font-size: 20px;
+            box-shadow: 0 4px 15px rgba(122, 31, 32, 0.4);
+        }
+        
+        .nav-list { list-style: none; padding: 0; margin: 0; flex: 1; }
+        .nav-item { margin-bottom: 10px; }
+        .nav-link {
+            display: flex; align-items: center; gap: 15px;
+            padding: 14px; border-radius: 12px;
+            color: var(--text-secondary); text-decoration: none;
+            font-weight: 600; font-size: 15px; transition: 0.2s;
+        }
+        .nav-link.active { background: rgba(255, 69, 58, 0.15); color: var(--brand-red); }
+        .user-info { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--ios-card-border); display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+
+        /* =========================================
+           MAIN CONTENT
+           ========================================= */
+        .container {
+            padding: calc(75px + var(--safe-area-top)) 16px 20px 16px;
+            max-width: 800px; margin: 0 auto;
+        }
+
+        /* KPI Horizontal Scroll */
+        .kpi-scroller {
+            display: flex; gap: 12px; overflow-x: auto;
+            padding-bottom: 10px; margin-bottom: 20px;
+            scrollbar-width: none; 
+        }
+        .kpi-scroller::-webkit-scrollbar { display: none; }
+
+        .kpi-card {
+            min-width: 140px; flex: 1;
+            background: var(--ios-card); padding: 16px;
+            border-radius: var(--radius-l);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .kpi-label { font-size: 10px; text-transform: uppercase; color: var(--text-secondary); font-weight: 700; margin-bottom: 5px; }
+        .kpi-value { font-size: 22px; font-weight: 700; color: white; letter-spacing: -0.5px; margin-bottom: 2px; }
+        .kpi-sub { font-size: 10px; color: var(--text-tertiary); }
+        
+        /* Search Bar */
+        .search-bar {
+            background: var(--ios-input-bg); border-radius: 10px; padding: 10px 15px;
+            display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+        }
+        .search-input { background: transparent; border: none; color: white; font-size: 16px; width: 100%; outline: none; }
+        
+        /* Agent List */
+        .agent-list { list-style: none; padding: 0; margin: 0; }
+        
+        .agent-card {
+            background: var(--ios-card); border-radius: var(--radius-l); padding: 16px;
+            margin-bottom: 16px; position: relative;
+        }
+        
+        .agent-header { display: flex; gap: 15px; align-items: center; margin-bottom: 15px; }
+        .agent-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+        .agent-info h3 { margin: 0; font-size: 16px; color: white; }
+        .agent-info p { margin: 2px 0 0; font-size: 12px; color: var(--text-secondary); }
+        
+        .agent-status { 
+            position: absolute; top: 16px; right: 16px; 
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--brand-green); box-shadow: 0 0 5px var(--brand-green);
+        }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-item { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; text-align: center; }
+        .stat-lbl { font-size: 9px; text-transform: uppercase; color: var(--text-secondary); display: block; }
+        .stat-val { font-size: 13px; font-weight: 700; color: white; display: block; margin-top: 2px; }
+
+        .progress-block { margin-bottom: 15px; }
+        .progress-head { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; }
+        .progress-track { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 3px; background: var(--brand-blue); }
+
+        .card-actions { display: flex; gap: 10px; }
+        .card-btn {
+            flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--ios-card-border);
+            background: transparent; color: var(--text-secondary); font-size: 13px; font-weight: 600;
+        }
+        .card-btn.primary { border-color: var(--brand-gold); color: var(--brand-gold); }
+
+        /* Modal Sheet */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            z-index: 2000; display: none; align-items: flex-end; justify-content: center;
+        }
+        .modal-sheet {
+            background: var(--ios-card); width: 100%; max-width: 600px;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            padding: 25px; padding-bottom: calc(25px + var(--safe-area-bottom));
+            animation: slideUp 0.3s ease-out;
+            max-height: 90vh; overflow-y: auto;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .profile-header { text-align: center; margin-bottom: 20px; }
+        .profile-avatar { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--brand-gold); margin-bottom: 10px; }
+        .profile-name { font-size: 20px; font-weight: 700; margin: 0; }
+        .profile-role { color: var(--text-secondary); font-size: 13px; text-transform: uppercase; margin-top: 5px; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .info-box { background: var(--ios-input-bg); padding: 15px; border-radius: 12px; }
+        .info-label { font-size: 10px; text-transform: uppercase; color: var(--text-secondary); display: block; }
+        .info-value { font-size: 18px; font-weight: 700; color: white; display: block; margin-top: 5px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleMenu()"></div>
+    <aside class="drawer" id="mainDrawer">
+        <div class="brand-profile">
+            <div class="brand-logo">M</div>
+            <div>
+                <div style="font-weight:700; font-size:16px;">CASA MASSIMA</div>
+                <div style="font-size:11px; color:var(--text-secondary);">Enterprise ERP</div>
+            </div>
+        </div>
+        
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="https://renato0503.github.io/Mobile_CasaM_Menu/" class="nav-link">
+                    <i class="fa fa-truck-fast"></i> Simulador Logístico
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="https://renato0503.github.io/Mobile_CasaM_PerformanceComercial/" class="nav-link">
+                    <i class="fa fa-chart-line"></i> Performance
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="https://renato0503.github.io/Mobile_CasaM_EquipeVendas/" class="nav-link active">
+                    <i class="fa fa-users"></i> Equipe
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="https://renato0503.github.io/Mobile_CasaM_Comissoes/" class="nav-link">
+                    <i class="fa fa-file-invoice-dollar"></i> Comissões
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="https://renato0503.github.io/Mobile_CasaM_RotasZonas/" class="nav-link">
+                    <i class="fa fa-map-location-dot"></i> Rotas & Zonas
+                </a>
+            </li>
+        </ul>
+
+        <div class="user-info">
+            <div class="avatar">F</div>
+            <div>
+                <div style="font-weight:600; font-size:14px;">Fausto</div>
+                <div style="font-size:11px; color:var(--text-secondary);">Diretor Comercial</div>
+            </div>
+        </div>
+    </aside>
+
+    <header class="app-header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="toggleMenu()"><i class="fa fa-bars"></i></button>
+            <div class="app-title">Equipe Vendas <span>Gestão de Agentes</span></div>
+        </div>
+        <div class="header-actions">
+            <button class="action-btn" onclick="alert('Adicionar Novo')"><i class="fa fa-user-plus"></i></button>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <div class="kpi-scroller">
+            <div class="kpi-card">
+                <span class="kpi-label">Total Agentes</span>
+                <span class="kpi-value" id="statTotalAgents">0</span>
+                <span class="kpi-sub">Ativos no momento</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Vendas Totais</span>
+                <span class="kpi-value" id="statTotalSales">R$ 0</span>
+                <span class="kpi-sub">Mês corrente</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Meta Global</span>
+                <span class="kpi-value" id="statGlobalGoal" style="color:var(--brand-gold)">0%</span>
+                <span class="kpi-sub">Progresso Equipe</span>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <i class="fa fa-search" style="color:#666"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Buscar vendedor..." onkeyup="filterAgents()">
+        </div>
+
+        <ul class="agent-list" id="agentContainer">
+            </ul>
+
+    </main>
+
+    <div class="modal-overlay" id="profileModal" onclick="closeModal(event)">
+        <div class="modal-sheet">
+            <div style="display:flex; justify-content:flex-end; margin-bottom:10px">
+                <button class="action-btn" onclick="document.getElementById('profileModal').style.display='none'"><i class="fa fa-times"></i></button>
+            </div>
+            
+            <div class="profile-header">
+                <img src="" id="modImg" class="profile-avatar">
+                <h2 class="profile-name" id="modName">Nome</h2>
+                <span class="profile-role" id="modRole">Cargo | Rota</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-box">
+                    <span class="info-label">Vendas Totais</span>
+                    <span class="info-value" id="modSales">R$ 0</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Comissão Est.</span>
+                    <span class="info-value" style="color:var(--brand-gold)" id="modComm">R$ 0</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Margem</span>
+                    <span class="info-value" style="color:var(--brand-green)" id="modMargin">R$ 0</span>
+                </div>
+                <div class="info-box">
+                    <span class="info-label">Clientes</span>
+                    <span class="info-value" id="modClients">0</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px">
+                <span class="info-label" style="margin-bottom:10px">Evolução Recente</span>
+                <div style="height:120px; width:100%"><canvas id="miniChart"></canvas></div>
+            </div>
+
+            <button class="card-btn primary" style="width:100%; padding:15px; font-size:16px">Enviar Mensagem</button>
+
+        </div>
+    </div>
+
+    <script>
+        const fmtMoney = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+        let miniChartInst = null;
+
+        // DATA
+        const agents = [
+            { id: 1, name: "Carlos Silva", role: "Sênior", route: "Sinop (Norte)", img: "https://i.pravatar.cc/150?u=1", sales: 154000, goal: 120000, margin: 22000, clients: 45, history: [120, 130, 110, 154] },
+            { id: 2, name: "Ana Pereira", role: "Pleno", route: "Várzea Grande", img: "https://i.pravatar.cc/150?u=2", sales: 82000, goal: 90000, margin: 8000, clients: 28, history: [70, 75, 80, 82] },
+            { id: 3, name: "Roberto Dias", role: "Sênior", route: "Lucas R. Verde", img: "https://i.pravatar.cc/150?u=3", sales: 210000, goal: 150000, margin: 45000, clients: 62, history: [180, 190, 200, 210] },
+            { id: 4, name: "Fernanda Lima", role: "Júnior", route: "Rondonópolis", img: "https://i.pravatar.cc/150?u=4", sales: 55000, goal: 60000, margin: 5000, clients: 15, history: [40, 45, 50, 55] },
+            { id: 5, name: "João Souza", role: "Pleno", route: "Matriz / Balcão", img: "https://i.pravatar.cc/150?u=5", sales: 98000, goal: 100000, margin: 12000, clients: 35, history: [90, 92, 95, 98] }
+        ];
+
+        function toggleMenu() {
+            const drawer = document.getElementById('mainDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            if(drawer.classList.contains('active')) {
+                drawer.classList.remove('active');
+                overlay.classList.remove('active');
+            } else {
+                drawer.classList.add('active');
+                overlay.classList.add('active');
+            }
+        }
+
+        window.onload = () => {
+            renderStats();
+            renderAgents(agents);
+        };
+
+        function renderStats() {
+            const totalSales = agents.reduce((acc, a) => acc + a.sales, 0);
+            const totalGoal = agents.reduce((acc, a) => acc + a.goal, 0);
+            
+            document.getElementById('statTotalAgents').innerText = agents.length;
+            document.getElementById('statTotalSales').innerText = fmtMoney.format(totalSales);
+            document.getElementById('statGlobalGoal').innerText = ((totalSales/totalGoal)*100).toFixed(0) + "%";
+        }
+
+        function renderAgents(data) {
+            const container = document.getElementById('agentContainer');
+            container.innerHTML = '';
+
+            data.forEach(agent => {
+                const percent = (agent.sales / agent.goal) * 100;
+                let barColor = '#0a84ff';
+                if(percent >= 100) barColor = '#30d158';
+                if(percent < 60) barColor = '#ff453a';
+
+                const html = `
+                    <li class="agent-card">
+                        <div class="agent-status"></div>
+                        <div class="agent-header">
+                            <img src="${agent.img}" class="agent-avatar">
+                            <div class="agent-info">
+                                <h3>${agent.name}</h3>
+                                <p>${agent.route} • ${agent.role}</p>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-lbl">Vendas</span>
+                                <span class="stat-val">${(agent.sales/1000).toFixed(1)}k</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-lbl">Margem</span>
+                                <span class="stat-val" style="color:${agent.margin>10000?'#30d158':'#8e8e93'}">${(agent.margin/1000).toFixed(1)}k</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-lbl">Clientes</span>
+                                <span class="stat-val">${agent.clients}</span>
+                            </div>
+                        </div>
+
+                        <div class="progress-block">
+                            <div class="progress-head">
+                                <span>Meta: ${fmtMoney.format(agent.goal)}</span>
+                                <span>${percent.toFixed(0)}%</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width:${Math.min(percent,100)}%; background:${barColor}"></div>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="card-btn primary" onclick="openProfile(${agent.id})">Ver Detalhes</button>
+                        </div>
+                    </li>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function filterAgents() {
+            const term = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = agents.filter(a => a.name.toLowerCase().includes(term) || a.route.toLowerCase().includes(term));
+            renderAgents(filtered);
+        }
+
+        function openProfile(id) {
+            const agent = agents.find(a => a.id === id);
+            if(!agent) return;
+
+            document.getElementById('modImg').src = agent.img;
+            document.getElementById('modName').innerText = agent.name;
+            document.getElementById('modRole').innerText = `${agent.role} | ${agent.route}`;
+            document.getElementById('modSales').innerText = fmtMoney.format(agent.sales);
+            document.getElementById('modMargin').innerText = fmtMoney.format(agent.margin);
+            document.getElementById('modComm').innerText = fmtMoney.format(agent.sales * 0.025);
+            document.getElementById('modClients').innerText = agent.clients;
+
+            if(miniChartInst) miniChartInst.destroy();
+            const ctxMini = document.getElementById('miniChart').getContext('2d');
+            miniChartInst = new Chart(ctxMini, {
+                type: 'line',
+                data: {
+                    labels: ['M-3', 'M-2', 'M-1', 'Atual'],
+                    datasets: [{
+                        data: agent.history,
+                        borderColor: '#ffd60a',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { display: false }, y: { display: false } }
+                }
+            });
+
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+
+        function closeModal(e) {
+            if(e.target.id === 'profileModal') {
+                document.getElementById('profileModal').style.display = 'none';
+            }
+        }
+
+    </script>
+</body>
+</html>
